@@ -131,7 +131,7 @@ if __name__ == "__main__":
     w.resize(1000, 600)
 
     # Set window title
-    w.setWindowTitle("NumDiff")
+    w.setWindowTitle("FFTPro")
 
     sys.exit(app.exec_())
 
