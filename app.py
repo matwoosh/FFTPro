@@ -8,7 +8,7 @@ from plot import TimeCanvas, FreqCanvas
 class ApplicationWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
-        self.setWindowTitle("FFT")
+        self.setWindowTitle("FFTPro")
 
         font = QFont('Sans-serif', 10, QFont.Light)
         self.setFont(font)
@@ -34,12 +34,16 @@ class ApplicationWindow(QMainWindow):
 
         # functions
         box_layout_menu.addWidget(QLabel("Signal functions"))
-        self.function_button_group = QButtonGroup()
-        self.function_buttons = [QRadioButton("Function " + str(i)) for i in range(1, 5)]
-        for function_button in self.function_buttons:
-            self.function_button_group.addButton(function_button)
-            box_layout_menu.addWidget(function_button)
-        self.function_buttons[0].click()  # set one trigger active
+        self.combo = QComboBox()
+        for i in range(1, 5):
+            self.combo.addItem("Function " + str(i))
+        box_layout_menu.addWidget(self.combo)
+        # self.function_button_group = QButtonGroup()
+        # self.function_buttons = [QRadioButton("Function " + str(i)) for i in range(1, 5)]
+        # for function_button in self.function_buttons:
+        #     self.function_button_group.addButton(function_button)
+        #     box_layout_menu.addWidget(function_button)
+        # self.function_buttons[0].click()  # set one trigger active
 
         # plot options
         box_layout_menu.addWidget(QLabel("Plot options"))
@@ -76,11 +80,8 @@ class ApplicationWindow(QMainWindow):
 
         self.draw_plots()
 
-    def closeEvent(self, ce):
-        self.fileQuit()
-
     def draw_plots(self):
-        function_index = self.function_button_group.checkedId() * (-1) - 2  # weird id...
+        function_index = self.combo.currentIndex()
         self.fft_plots.set_signal_function(function_index)
         self.fft_plots.recalculate(self.noise_slider.sliderPosition(), self.noise_filter.isChecked())
         self.time_domain.compute_initial_figure(self.fft_plots)
