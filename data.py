@@ -1,69 +1,75 @@
-from enum import Enum
-from math import sin, cos, sqrt, exp, floor, ceil
+import random
+
+import matplotlib
 import numpy as np
 
 
-class DerivativeType(Enum):
-    central = 1
-    backward = 2
-    forward = 3
+class FFTPlots:
+    def __init__(self):
+        font = {'family': 'sans-serif',
+                'size': 12}
+        matplotlib.rc('font', **font)
 
+        Fs = 150.0  # sampling rate
+        Ts = 1.0 / Fs # sampling interval
+        self.t = np.arange(0, 1, Ts)  # time vector
 
-def function1(x, y):
-    return sin(x)
+        ff = 5  # frequency of the signal
+        self.functions = [
+            np.sin(2 * np.pi * ff * self.t),
+            np.cos(2 * np.pi * ff * self.t),
+            0.7*np.sin(2 * np.pi * ff * self.t) + 0.2*np.sin(2* 5 * np.pi * ff * self.t) + 0.4*np.sin(2*10 * np.pi * ff * self.t),
+            0.7*np.cos(2 * np.pi * ff * self.t) + 0.2*np.cos(2* 5 * np.pi * ff * self.t) + 0.4*np.cos(2*10 * np.pi * ff * self.t),
+        ]
+        self.signal = self.functions[0]
+        y = self.signal.copy()
 
+        n = len(y)  # length of the signal
+        k = np.arange(n)
+        T = n / Fs
+        frq = k / T # two sides frequency range
+        frq = frq[list(range(n//2))]  # one side frequency range
 
-def function2(x, y):
-    return cos(x)
+        fft_res = np.fft.fft(y)  # fft computing
+        Y = fft_res / n # normalization
+        Y = Y[list(range(n//2))]
 
+        self.y = y
+        self.Y = Y
+        self.freq = frq
+        self.inverse_y = np.fft.ifft(fft_res)
 
-def function3(x, y):
-    return x ** 2
+    def set_signal_function(self, number):
+        if number > len(self.functions) - 1:
+            return
+        self.signal = self.functions[number]
 
+    def time_plot_data(self):
+        return self.t, self.y
 
-def function4(x, y):
-    return (x ** 3) - 9 * (x ** 2) + 25 * x - 17
+    def re_plot_data(self):
+        return self.freq, self.Y.real
 
+    def im_plot_data(self):
+        return self.freq, self.Y.imag
 
-def function5(x, y):
-    return (x ** 4) - 3 * (x ** 2)
+    def inverse_time_plot_data(self):
+        return self.t, self.inverse_y.real
 
+    def recalculate(self, noise, noise_filter):
+        random_noise = [random.uniform(0, noise) for i in range(0, self.signal.size)]
+        y = self.signal.copy()
+        y += np.array(random_noise)
 
-def function6(x, y):
-    if x >= 0:
-        return sqrt(x)
-    else:
-        return 0
+        n = len(y)  # length of the signal
+        fft_res = np.fft.fft(y)  # fft computing
+        Y = fft_res / n  # normalization
+        Y = Y[list(range(n//2))]
 
-
-def function7(x, y):
-    return exp(x)
-
-
-def function8(x, y):
-    return abs(x)
-
-
-def function9(x, y):
-    return floor(x)
-
-
-def function10(x,y):
-    return 2 * x + ceil(x)
-
-
-def function11(x,y):
-    return floor(x) * x + ceil(x)
-
-# list of functions_data in format ("name", function, arguments)
-functions = [("sin(x)", function1, np.arange(0, 10, 0.01)),
-             ("cos(x)", function2, np.arange(0, 10, 0.01)),
-             ("x^2", function3, np.arange(0, 4, 0.01)),
-             ("x^3 - 9x^2 + 25x - 17", function4, np.arange(0, 5, 0.01)),
-             ("x^4 - 3x^2", function5, np.arange(0, 2, 0.01)),
-             ("sqrt(x)", function6, np.arange(0, 10, 0.01)),  # something doesnt work here
-             ("exp(x)", function7, np.arange(0, 10, 0.1)),
-             ("|x|", function8, np.arange(-2, 2, 0.1)),
-             ("floor(x)", function9, np.arange(-3, 3, 0.01)),
-             ("2 * x + ceil(x)", function10, np.arange(-3, 3, 0.01)),
-             ("floor(x) * x + ceil(x)", function11, np.arange(-3, 3, 0.01))]
+        self.y = y
+        self.Y = Y
+        if noise_filter:
+            mean_value = np.mean(abs(fft_res))
+            value = 1.1 * mean_value
+            fft_res = [0 if (abs(res) < value) else res for res in fft_res]
+        self.inverse_y = np.fft.ifft(fft_res)
