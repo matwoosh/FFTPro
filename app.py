@@ -1,72 +1,8 @@
 import sys
 
 from PyQt4.QtGui import *
-from PyQt4.uic.properties import QtCore
-from matplotlib.figure import Figure
-from PyQt4 import QtGui
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from data import FFTPlots
-
-class MyMplCanvas(FigureCanvas):
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
-        self.fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = self.fig.add_subplot(111)
-        # We want the axes cleared every time plot() is called
-        self.axes.hold(False)
-        self.type = 0
-        FigureCanvas.__init__(self, self.fig)
-        self.setParent(parent)
-
-        FigureCanvas.setSizePolicy(self,
-                                   QSizePolicy.Expanding,
-                                   QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-
-
-class TimeCanvas(MyMplCanvas):
-    def compute_initial_figure(self, fft_plot):
-        t, y = fft_plot.time_plot_data()
-        self.axes.plot(t, y)  # time domain
-        self.axes.set_xlabel('Czas')
-        self.axes.set_ylabel('Amplituda')
-        self.draw()
-
-
-class FreqCanvas(MyMplCanvas):
-
-    def compute_initial_figure(self, fft_plot, plot_type):
-        if plot_type == 2:      #ifft
-            if plot_type != self.type:
-                self.fig.delaxes(self.pl1)
-                self.fig.delaxes(self.pl2)
-                self.axes.get_xaxis().set_visible(True)
-                self.axes.get_yaxis().set_visible(True)
-                self.type = 2
-            t, y = fft_plot.inverse_time_plot_data()
-            self.axes.plot(t, y, 'r')
-            self.axes.set_xlabel('Czas')
-            self.axes.set_ylabel('Amplituda')
-
-        else:
-
-            self.pl1 = self.fig.add_subplot(211)
-            self.pl2 = self.fig.add_subplot(212)
-            self.pl1.hold(False)
-            self.pl2.hold(False)
-
-            freq, im = fft_plot.im_plot_data()
-            freq2, re = fft_plot.re_plot_data()
-            self.pl1.plot(freq2, re, 'b')
-            self.pl2.plot(freq, im, 'r')
-            self.pl1.set_xlabel(u'Częstotliwość (Hz)')
-            self.pl1.set_ylabel('Amplituda')
-            self.pl2.set_xlabel(u'Częstotliwość (Hz)')
-            self.pl2.set_ylabel('Amplituda')
-            self.pl1.set_title(u'Część rzeczywista')
-            self.pl2.set_title(u'Część urojona')
-            self.axes.get_xaxis().set_visible(False)
-            self.axes.get_yaxis().set_visible(False)
-        self.draw()
+from plot import TimeCanvas, FreqCanvas
 
 
 class ApplicationWindow(QMainWindow):
@@ -89,24 +25,24 @@ class ApplicationWindow(QMainWindow):
         self.freq_domain = FreqCanvas(width=5, height=4, dpi=60)
 
         tabs = QTabWidget()
-        tabs.addTab(self.time_domain, "1")
-        tabs.addTab(self.freq_domain, "2")
+        tabs.addTab(self.time_domain, "Time")
+        tabs.addTab(self.freq_domain, "Frequency")
 
         box_layout_plots.addWidget(tabs)
 
         box_layout_menu = QVBoxLayout()
 
         # functions
-        box_layout_menu.addWidget(QLabel("Funkcje sygnałów"))
+        box_layout_menu.addWidget(QLabel("Signal functions"))
         self.function_button_group = QButtonGroup()
-        self.function_buttons = [QRadioButton("&Funkcja " + str(i)) for i in range(1, 5)]
+        self.function_buttons = [QRadioButton("Function " + str(i)) for i in range(1, 5)]
         for function_button in self.function_buttons:
             self.function_button_group.addButton(function_button)
             box_layout_menu.addWidget(function_button)
         self.function_buttons[0].click()  # set one trigger active
 
         # plot options
-        box_layout_menu.addWidget(QLabel("Opcje wykresu"))
+        box_layout_menu.addWidget(QLabel("Plot options"))
         self.plot_options_button_group = QButtonGroup()
         self.re_button = QRadioButton("FFT")
         self.ifft_button = QRadioButton("IFFT")
@@ -132,8 +68,8 @@ class ApplicationWindow(QMainWindow):
         self.draw_button.clicked.connect(self.draw_plots)
         box_layout_menu.addWidget(self.draw_button)
 
-        horizontal_layout.addLayout(box_layout_plots)
         horizontal_layout.addLayout(box_layout_menu)
+        horizontal_layout.addLayout(box_layout_plots)
 
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
