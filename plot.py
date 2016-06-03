@@ -22,7 +22,7 @@ class MyMplCanvas(FigureCanvas):
 class TimeCanvas(MyMplCanvas):
     def compute_initial_figure(self, fft_plot):
         t, y = fft_plot.time_plot_data()
-        self.axes.plot(t, y)  # time domain
+        self.axes.plot(t, y, 'r')  # time domain
         self.axes.set_xlabel('Time')
         self.axes.set_ylabel('Amplitude')
         self.draw()
@@ -39,7 +39,7 @@ class FreqCanvas(MyMplCanvas):
                 self.axes.get_yaxis().set_visible(True)
                 self.type = 2
             t, y = fft_plot.inverse_time_plot_data()
-            self.axes.plot(t, y, 'r')
+            self.axes.plot(t, y)
             self.axes.set_xlabel('Time')
             self.axes.set_ylabel('Amplitude')
 
@@ -54,9 +54,9 @@ class FreqCanvas(MyMplCanvas):
             freq2, re = fft_plot.re_plot_data()
             self.pl1.plot(freq2, re, 'b')
             self.pl2.plot(freq, im, 'r')
-            self.pl1.set_xlabel('Frequency (Hz)')
+            self.pl1.set_xlabel('Frequency [Hz]')
             self.pl1.set_ylabel('Amplitude')
-            self.pl2.set_xlabel('Frequency (Hz)')
+            self.pl2.set_xlabel('Frequency [Hz]')
             self.pl2.set_ylabel('Amplitude')
             self.pl1.set_title('Real part')
             self.pl2.set_title('Imaginary part')

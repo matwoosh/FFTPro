@@ -10,16 +10,14 @@ class FFTPlots:
                 'size': 12}
         matplotlib.rc('font', **font)
 
-        Fs = 150.0  # sampling rate
+        Fs = 180.0  # sampling rate
         Ts = 1.0 / Fs # sampling interval
         self.t = np.arange(0, 1, Ts)  # time vector
 
         ff = 5  # frequency of the signal
         self.functions = [
             np.sin(2 * np.pi * ff * self.t),
-            np.cos(2 * np.pi * ff * self.t),
-            0.7*np.sin(2 * np.pi * ff * self.t) + 0.2*np.sin(2* 5 * np.pi * ff * self.t) + 0.4*np.sin(2*10 * np.pi * ff * self.t),
-            0.7*np.cos(2 * np.pi * ff * self.t) + 0.2*np.cos(2* 5 * np.pi * ff * self.t) + 0.4*np.cos(2*10 * np.pi * ff * self.t),
+            np.cos(2 * np.pi * ff * self.t)
         ]
         self.signal = self.functions[0]
         y = self.signal.copy()

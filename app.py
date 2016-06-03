@@ -35,15 +35,9 @@ class ApplicationWindow(QMainWindow):
         # functions
         box_layout_menu.addWidget(QLabel("Signal functions"))
         self.combo = QComboBox()
-        for i in range(1, 5):
-            self.combo.addItem("Function " + str(i))
+        self.combo.addItem("sin(x) based function")
+        self.combo.addItem("cos(x) based function")
         box_layout_menu.addWidget(self.combo)
-        # self.function_button_group = QButtonGroup()
-        # self.function_buttons = [QRadioButton("Function " + str(i)) for i in range(1, 5)]
-        # for function_button in self.function_buttons:
-        #     self.function_button_group.addButton(function_button)
-        #     box_layout_menu.addWidget(function_button)
-        # self.function_buttons[0].click()  # set one trigger active
 
         # plot options
         box_layout_menu.addWidget(QLabel("Plot options"))
@@ -58,10 +52,16 @@ class ApplicationWindow(QMainWindow):
 
         # noise slider
         box_layout_menu.addWidget(QLabel("Noise"))
-        self.noise_slider = QSlider()
-        self.noise_slider.setMinimum(0)
-        self.noise_slider.setMaximum(10)
-        box_layout_menu.addWidget(self.noise_slider)
+        self.noise_button_group = QButtonGroup()
+        self.noise_buttons = [QRadioButton(str(i)) for i in range(0, 10)]
+        for noise_button in self.noise_buttons:
+            self.noise_button_group.addButton(noise_button)
+            box_layout_menu.addWidget(noise_button)
+        self.noise_buttons[0].click()  # set one trigger active
+        # self.noise_slider = QSlider()
+        # self.noise_slider.setMinimum(0)
+        # self.noise_slider.setMaximum(10)
+        # box_layout_menu.addWidget(self.noise_slider)
 
         # noise filter checkbox
         self.noise_filter = QCheckBox("Filter")
@@ -83,7 +83,8 @@ class ApplicationWindow(QMainWindow):
     def draw_plots(self):
         function_index = self.combo.currentIndex()
         self.fft_plots.set_signal_function(function_index)
-        self.fft_plots.recalculate(self.noise_slider.sliderPosition(), self.noise_filter.isChecked())
+        print(self.noise_button_group.checkedId()*(-1)-2)
+        self.fft_plots.recalculate(self.noise_button_group.checkedId()*(-1)-2, self.noise_filter.isChecked())
         self.time_domain.compute_initial_figure(self.fft_plots)
         plot_type = 0  # re_checked
         if self.ifft_button.isChecked():
